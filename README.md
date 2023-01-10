@@ -49,7 +49,7 @@ import (
 
 func main() {
   opt := nxamf.NewOutputStream() // Create new OutputStream
-	msg := nxamf.NewMessage() // Create new Message
+  msg := nxamf.NewMessage() // Create new Message
   data := []interface{}{"Hello!",123.456,false}
   msg.AddHeader(nxamf.NewHeader("name",false,"data")) // Add new header, false is the "required" field
   msg.AddBody(nxamf.NewBody("Target","Response",nxamf.NewAMF3_Wrapper(data))) // Add new body
