@@ -1,5 +1,7 @@
 # nxamf
-nxamf is a port of SabreAMF in Go. It's an AMF client written in Go. Supports AMF0 and AMF3. 
+nxamf is a port of SabreAMF in Go. It's an AMF client written in Go. Supports AMF0 and AMF3. <br>
+##### Please make sure all the issues are library related! <br>
+###### If any error is being encountered please create an entry in the `Issues` tab or make a pull request if you can fix it yourself
 
 ### AMF
 Action Message Format (AMF) is a binary format used to serialize object graphs such as ActionScript objects and XML, or send messages between an Adobe Flash client and a remote service, usually a Flash Media Server or third party alternatives.
@@ -27,6 +29,7 @@ This project was started purely out of boredom. I once looked around GitHub for 
 - Array `[]interface{}`
 - Object `map[string]interface{}`
 - Associative Array `MixedArray`
+- Null `nil`
 
 ### What is unsupported?
 Things that haven't been ported from SabreAMF or not made in SabreAMF (that of course weren't made here either) include:
