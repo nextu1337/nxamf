@@ -3,6 +3,10 @@ nxamf is a port of SabreAMF in Go. It's an AMF client written in Go. Supports AM
 ##### Please make sure all the issues are library related! <br>
 ###### If any error is being encountered please create an entry in the `Issues` tab or make a pull request if you can fix it yourself
 
+### This project is unfinished
+#### TODO: AMF3 Deserializer and finish the Client
+
+
 ### AMF
 Action Message Format (AMF) is a binary format used to serialize object graphs such as ActionScript objects and XML, or send messages between an Adobe Flash client and a remote service, usually a Flash Media Server or third party alternatives.
 
