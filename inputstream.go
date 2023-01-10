@@ -41,7 +41,7 @@ func (a *InputStream) ReadDouble() (float64,error) {
 	if err != nil {
 		return -1,err
 	}
-	double = strrev(fmt.Sprintf("%d",double))
+	double = strrev(fmt.Sprintf("%s",double))
 	return f64frombytes([]byte(double)),nil
 }
 

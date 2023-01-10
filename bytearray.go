@@ -1,18 +1,18 @@
 package nxamf
 
 type ByteArray struct {
-	data interface{}
+	data string
 }
 
-func (a *ByteArray) SetData(data interface{}) {
+func (a *ByteArray) SetData(data string) {
 	a.data = data
 }
 
-func (a *ByteArray) GetData() interface{} {
+func (a *ByteArray) GetData() string {
 	return a.data
 }
 
-func NewByteArray(data interface{}) *ByteArray {
+func NewByteArray(data string) *ByteArray {
 	a := new(ByteArray)
 	a.SetData(data)
 	return a

@@ -1,13 +1,14 @@
 package nxamf
 
 import "time"
-import "fmt"
 import "reflect"
 
 
 type AMF0_Serializer struct {
 	Stream *OutputStream
 }
+
+type MixedArray map[string]interface{}
 
 
 func (a *AMF0_Serializer) WriteAMFData(data interface{}, forcetype int) {
@@ -38,22 +39,8 @@ func (a *AMF0_Serializer) WriteAMFData(data interface{}, forcetype int) {
 		case []interface{}:
 			typ = types["DT_ARRAY"]
 			break
-		case map[int]interface{}:
-			if !a.IsPureArray(data.(map[int]interface{})) {
-				mS := make(map[string]interface{})
-				for k,v := range data.(map[int]interface{}) {
-					mS[fmt.Sprintf("%v",k)] = v
-				}
-				data = mS
-				typ = types["DT_MIXEDARRAY"]
-			} else {
-				mS := []interface{}{}
-				for _,v := range data.(map[int]interface{}) {
-					mS = append(mS,v)
-				}
-				data = mS
-				typ = types["DT_ARRAY"]
-			}
+		case MixedArray:
+			typ = types["DT_MIXEDARRAY"]
 			break
 		case *AMF3_Wrapper:
 			typ = types["DT_AMF3"]
@@ -64,14 +51,10 @@ func (a *AMF0_Serializer) WriteAMFData(data interface{}, forcetype int) {
 		default:
 			if reflect.ValueOf(data).Kind() == reflect.Struct {
 				//if a.GetRemoteClassName(data.(string)) != "" { // temporary
-				if false == true {
+				if false == true { // typed object not supported alright
 					typ = types["DT_TYPEDOBJECT"]
 					break
-				} 
-				// else {
-				// 	typ = types["DT_OBJECT"]
-				// 	break
-				// }
+				}
 			}
 			
 		}
@@ -108,7 +91,7 @@ func (a *AMF0_Serializer) WriteAMFData(data interface{}, forcetype int) {
 	case types["DT_NULL"]:
 		break
 	case types["DT_MIXEDARRAY"]:
-		a.WriteMixedArray(data.(map[string]interface{}))
+		a.WriteMixedArray(data.(MixedArray))
 		break
 	case types["DT_ARRAY"]:
 		a.WriteArray(data.([]interface{}))
@@ -128,7 +111,7 @@ func (a *AMF0_Serializer) WriteAMFData(data interface{}, forcetype int) {
 	}
 }
 
-func (a *AMF0_Serializer) WriteMixedArray(data map[string]interface{}) {
+func (a *AMF0_Serializer) WriteMixedArray(data MixedArray) {
 	a.Stream.WriteLong(0)
 	for k,v := range data {
 		a.WriteString(string(k))
@@ -174,11 +157,11 @@ func (a *AMF0_Serializer) WriteLongString(data string) {
 
 func (a *AMF0_Serializer) WriteTypedObject(data interface{}) {
 	// im lost
+	// this isnt supported alright
 }
 
 func (a *AMF0_Serializer) WriteAMF3Data(data *AMF3_Wrapper) {
-	// TODO: Change interface to AMF3_Wrapper // done
-	//  NewAMF3Serializer(a.Stream).WriteAMFData(data->getData())
+	NewAMF3_Serializer(a.Stream).WriteAMFData(data.GetData(),-1)
 }
 
 func (a *AMF0_Serializer) WriteDate(data time.Time) {
@@ -187,6 +170,7 @@ func (a *AMF0_Serializer) WriteDate(data time.Time) {
 }
 
 // Checks whether array (or in this case map[int]interface{}) is sparse or not, for some reason doesn't work even if indexes are in a good order..
+// Doesn't work :trollface:
 func (a *AMF0_Serializer) IsPureArray(array map[int]interface{}) bool {
 	var i int = 0
 	for k,_ := range array {
@@ -198,18 +182,12 @@ func (a *AMF0_Serializer) IsPureArray(array map[int]interface{}) bool {
 	return true
 }
 
-func (a *AMF0_Serializer) GetRemoteClassName(localClass string) string {
-	return GetRemoteClass(localClass)
-}
-
-// public function to get OutputStream
 func (a *AMF0_Serializer) GetStream() *OutputStream {
 	return a.Stream
 }
 
-// Create object of AMF0 Serializer
-func NewAMF0_Serializer(str *OutputStream) AMF0_Serializer {
-	var a AMF0_Serializer
+func NewAMF0_Serializer(str *OutputStream) *AMF0_Serializer {
+	a := new(AMF0_Serializer)
 	a.Stream = str
 	return a
 }
