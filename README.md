@@ -23,7 +23,7 @@ This project was started purely out of boredom. I once looked around GitHub for 
 - Array `[]interface{}`
 - Date `time.Time`
 - AMF3 `AMF3_Wrapper`
-
+- TypedObject `isn't supported when serializing but is supported when deserializing so TypedObject`
 ## AMF3
 - Integer `int`
 - Number `float64`
