@@ -4,7 +4,7 @@ nxamf is a port of SabreAMF in Go. It's an AMF client written in Go. Supports AM
 ###### If any error is being encountered please create an entry in the `Issues` tab or make a pull request if you can fix it yourself
 
 ### This project is unfinished
-#### TODO: AMF3 Deserializer and finish the Client
+#### TODO: 
 
 
 ### AMF
@@ -37,9 +37,8 @@ This project was started purely out of boredom. I once looked around GitHub for 
 
 ### What is unsupported?
 Things that haven't been ported from SabreAMF or not made in SabreAMF (that of course weren't made here either) include:
-- DT_TYPEDOBJECT, both in AMF0 and AMF3. Every object in AMF3 is of encoding type `ET_PROPLIST` (0x00)
-- DT_XML, DT_XMLSTRING
-- DT_MOVIECLIP, DT_REFERENCE
+- DT_TYPEDOBJECT isn't fully supported, can't be serialized due to Go having weird way of recognizing private methods/fields from public.
+- DT_MOVIECLIP
 blah blah blah I don't think there is anything more missing (which there probably is but it's not as relevant)
 
 ## Example code
@@ -63,5 +62,23 @@ func main() {
   msg.Serialize(opt) // Serialize using the OutputStream
   // Code below is not needed
   fmt.Println(hex.EncodeToString([]byte(opt.GetRawData()))) // hex dump
+}
+```
+
+```go
+package main
+
+import (
+  nx "github.com/nextu1337/nxamf" // Import the library
+  "fmt"
+)
+
+func main() {
+  body := []interface{}{"anything can be put here"}
+  c := nx.NewClient("url")
+  // c.SetHttpProxy("http://127.0.0.1:8888") // allows setting a http proxy
+  c.AddHeader("name",false,"data")
+  resp := c.SendRequest("target",nx.NewAMF3_Wrapper(body)) // Response can be anything that is listed in the supported tab
+  fmt.Println(resp)
 }
 ```
