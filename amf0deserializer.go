@@ -2,15 +2,13 @@ package nxamf
 
 import "time"
 import "math"
-import "strconv"
-import "fmt"
 
 type AMF0_Deserializer struct {
 	Stream *InputStream
 	SavedReferences []interface{}
 	RefList []interface{}
 	SavedRefs []interface{}
-	// Amf3Deserializer AMF3_Deserializer
+	Amf3Deserializer *AMF3_Deserializer
 }
 
 func (a *AMF0_Deserializer) ReadAMFData(settype int, newscope bool) interface{} {
@@ -21,7 +19,6 @@ func (a *AMF0_Deserializer) ReadAMFData(settype int, newscope bool) interface{} 
 	if settype == -1 {
 		settype, _ = a.Stream.ReadByte()
 	}
-
 	switch settype {
 	case types["DT_NUMBER"]:
 		val,_ := a.Stream.ReadDouble()
@@ -123,22 +120,35 @@ func (a *AMF0_Deserializer) ReadDate() time.Time {
 	timestamp,_ := a.Stream.ReadDouble()
 	timestamp = math.Floor(timestamp/1000)
 	a.Stream.ReadInt() // timezone offset
-	i, _ := strconv.ParseInt(fmt.Sprintf("%d",timestamp), 10, 64)
-	dateTime := time.Unix(i, 0)
+	dateTime := time.Unix(int64(timestamp), 0)
 	return dateTime
 }
 // TODO: those two
 
 func (a *AMF0_Deserializer) ReadAMF3Data() interface{} {
-	return nil
+	amf3Deserializer := NewAMF3_Deserializer(a.Stream,a.SavedRefs)
+	data := amf3Deserializer.ReadAMFData(-1)
+	a.SavedRefs = amf3Deserializer.GetReferences()
+	return NewAMF3_Wrapper(data)
 }
 
 func (a *AMF0_Deserializer) ReadTypedObject() interface{} {
-	return nil
+	classname := a.ReadString()
+	// isMapped := false
+	rObject := NewTypedObject(classname,nil)
+	a.RefList = append(a.RefList,&rObject)
+	props := map[string]interface{}{}
+	for ;; {
+		key := a.ReadString()
+		vartype, _ := a.Stream.ReadByte()
+		if vartype == AMF0Const()["DT_OBJECTTERM"] {
+			break
+		}
+		props[key] = a.ReadAMFData(vartype,false)
+	}
+	rObject.SetAMFData(props)
+	return rObject
 }
-
-
-
 
 func NewAMF0_Deserializer(stream *InputStream, savedRefs []interface{}) *AMF0_Deserializer {
 	a := new(AMF0_Deserializer)

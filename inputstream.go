@@ -3,6 +3,7 @@ package nxamf
 import (
 	"errors"
 	"fmt"
+	"math"
 	"encoding/binary"
 )
 
@@ -41,8 +42,9 @@ func (a *InputStream) ReadDouble() (float64,error) {
 	if err != nil {
 		return -1,err
 	}
-	double = strrev(fmt.Sprintf("%s",double))
-	return f64frombytes([]byte(double)),nil
+	bits := binary.BigEndian.Uint64([]byte(double))
+    float := math.Float64frombits(bits)
+	return float,nil
 }
 
 func (a *InputStream) ReadLong() (uint32,error) {
