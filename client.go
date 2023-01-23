@@ -1,7 +1,7 @@
 package nxamf
 
 import (
-	// "fmt"
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -17,14 +17,15 @@ type Client struct {
 	amfResponse *Message
 	encoding int
 	httpHeaders []interface{}
+	proxySet bool
 }
 
-func (this *Client) SendRequest(servicePath string, data interface{}) interface{} {
+func (this *Client) SendRequest(servicePath string, data interface{}) (interface{},error) {
 	// if this.encoding & Const()["FLEXMSG"] == 1 {
 		/*
 		if($this->encoding & SabreAMF_Const::FLEXMSG) {
 
-
+				XD we're not doing this LOLOLO LLMFAOOOO AHAHAHAH XDDD
                 // Setting up the message
                 $message = new SabreAMF_AMF3_RemotingMessage();
                 $message->body = $data;
@@ -53,19 +54,36 @@ func (this *Client) SendRequest(servicePath string, data interface{}) interface{
 
 	if len(this.httpProxy) > 0 {
 		os.Setenv("HTTP_PROXY", this.httpProxy)
+		this.proxySet = true
+	} else {
+		if this.proxySet {
+			os.Unsetenv("HTTP_PROXY")
+			this.proxySet = false
+		}
 	}
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST",this.endPoint,strings.NewReader(this.amfOutputStream.GetRawData()))
 	if err != nil {
-		panic(err)
+		return nil,err
 	}
 	
 	for _,v := range headers {
 		s := strings.Split(v.(string),":")
 		req.Header.Add(s[0],strings.Join(s[1:],":"))
 	}
-	resp,_ := client.Do(req)
+	resp,err := client.Do(req)
+	if err != nil {
+		return nil,err
+	}
+
+	switch resp.StatusCode {
+	case 200:
+		break;
+	default:
+		return nil,errors.New(resp.Status)
+	}
+
 	bodyBytes,_ := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	this.amfInputStream = NewInputStream(string(bodyBytes))
@@ -74,12 +92,14 @@ func (this *Client) SendRequest(servicePath string, data interface{}) interface{
 
 	this.parseHeaders()
 
+	
+
 	for _, body := range this.amfResponse.GetBodies().([]*Body) {
 		if body.Target[:2] == "/1" {
-			return body.Data
+			return body.Data,nil
 		}
 	}
-	return nil
+	return nil,errors.New("Something went wrong, this should not happen")
 }
 
 func (this *Client) AddHTTPHeader(header string) {
@@ -122,5 +142,6 @@ func NewClient(endPoint string) *Client {
 	client.endPoint = endPoint
 	client.amfRequest = NewMessage()
 	client.amfOutputStream = NewOutputStream()
+	client.proxySet = false
 	return client
 }
