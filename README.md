@@ -4,8 +4,8 @@ nxamf is a port of SabreAMF in Go. It's an AMF client written in Go. Supports AM
 ###### If any error is being encountered please create an entry in the `Issues` tab or make a pull request if you can fix it yourself
 ###### This project in no way is representing my coding skills. Every problem was solved the same way it is in `github.com/evert/SabreAMF` 
 
-### This project is unfinished
-#### TODO: Finish
+## Installation
+Do `go install github.com/nextu1337/nxamf@latest`
 
 
 ### AMF
